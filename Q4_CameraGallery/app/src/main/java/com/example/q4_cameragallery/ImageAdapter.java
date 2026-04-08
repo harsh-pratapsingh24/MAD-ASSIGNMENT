@@ -1,51 +1,57 @@
 package com.example.q4_cameragallery;
 
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
 
-import java.io.File;
+import androidx.recyclerview.widget.RecyclerView;
 
-public class ImageAdapter extends BaseAdapter {
+import java.util.ArrayList;
+
+public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
 
     Context context;
-    File[] files;
+    ArrayList<String> list;
 
-    public ImageAdapter(Context context, File[] files) {
+    public ImageAdapter(Context context, ArrayList<String> list) {
         this.context = context;
-        this.files = files;
+        this.list = list;
     }
 
     @Override
-    public int getCount() {
-        return files.length;
-    }
-
-    @Override
-    public Object getItem(int i) {
-        return files[i];
-    }
-
-    @Override
-    public long getItemId(int i) {
-        return i;
-    }
-
-    @Override
-    public View getView(int i, View view, ViewGroup parent) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         ImageView imageView = new ImageView(context);
-
-        Bitmap bitmap = BitmapFactory.decodeFile(files[i].getAbsolutePath());
-        imageView.setImageBitmap(bitmap);
-
-        imageView.setLayoutParams(new GridView.LayoutParams(300, 300));
+        imageView.setLayoutParams(new ViewGroup.LayoutParams(300, 300));
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        return new ViewHolder(imageView);
+    }
 
-        return imageView;
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        String path = list.get(position);
+        holder.imageView.setImageBitmap(BitmapFactory.decodeFile(path));
+
+        holder.imageView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, DetailActivity.class); // ✅ FIXED
+            intent.putExtra("path", path);
+            context.startActivity(intent);
+        });
+    }
+
+    @Override
+    public int getItemCount() {
+        return list.size();
+    }
+
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView imageView;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            imageView = (ImageView) itemView;
+        }
     }
 }

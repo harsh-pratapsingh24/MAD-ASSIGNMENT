@@ -1,44 +1,79 @@
+
 package com.example.q4_cameragallery;
 
-import android.graphics.BitmapFactory;
-import android.os.Bundle;
-import android.widget.*;
+
 import androidx.appcompat.app.AlertDialog;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+
 import androidx.appcompat.app.AppCompatActivity;
+
 
 import java.io.File;
 
+
 public class DetailActivity extends AppCompatActivity {
+
+
+    ImageView imageView;
+    TextView details;
+    Button deleteBtn;
+
+
+    String path;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        ImageView imageView = findViewById(R.id.imageView);
-        TextView details = findViewById(R.id.details);
-        Button deleteBtn = findViewById(R.id.deleteBtn);
 
-        String path = getIntent().getStringExtra("path");
+        imageView = findViewById(R.id.imageView);
+        details = findViewById(R.id.details);
+        deleteBtn = findViewById(R.id.deleteBtn);
 
-        File file = new File(path);
 
-        imageView.setImageBitmap(BitmapFactory.decodeFile(path));
+        // Get image path from intent
+        path = getIntent().getStringExtra("path");
 
-        details.setText(
-                "Name: " + file.getName() +
-                        "\nPath: " + path +
-                        "\nSize: " + file.length() +
-                        "\nDate: " + file.lastModified()
-        );
 
+        if (path != null) {
+            File file = new File(path);
+
+
+            // Show image
+            imageView.setImageBitmap(android.graphics.BitmapFactory.decodeFile(path));
+
+
+            // Show details
+            details.setText(
+                    "Name: " + file.getName() +
+                            "\nPath: " + file.getAbsolutePath() +
+                            "\nSize: " + file.length() + " bytes" +
+                            "\nLast Modified: " + file.lastModified()
+            );
+        }
+
+
+        // Delete button
         deleteBtn.setOnClickListener(v -> {
-            new AlertDialog.Builder(this)
-                    .setTitle("Delete")
-                    .setMessage("Are you sure?")
-                    .setPositiveButton("Yes", (d, w) -> {
-                        file.delete();
-                        finish();
+            new AlertDialog.Builder(DetailActivity.this)
+                    .setTitle("Delete Image")
+                    .setMessage("Are you sure you want to delete this image?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        File file = new File(path);
+                        if (file.exists() && file.delete()) {
+                            Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show();
+                            finish(); // go back to gallery
+                        } else {
+                            Toast.makeText(this, "Delete failed", Toast.LENGTH_SHORT).show();
+                        }
                     })
                     .setNegativeButton("No", null)
                     .show();
